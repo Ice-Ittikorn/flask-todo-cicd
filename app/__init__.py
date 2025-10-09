@@ -41,7 +41,6 @@ def create_app(config_name=None):
     default_limits=["200 per day", "50 per hour"]
 )
 
-
     # Error handlers
     @app.errorhandler(404)
     def not_found(error):
