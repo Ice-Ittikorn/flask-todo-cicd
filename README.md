@@ -16,5 +16,4 @@ docker-compose up -d
 - `GET /api/health` - Health check
 - `GET /api/todos` - Get all todos
 - `POST /api/todos` - Create todo
-- ...
 
