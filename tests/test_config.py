@@ -1,6 +1,18 @@
 import pytest
 import os
 from app.config import Config, DevelopmentConfig, TestingConfig, ProductionConfig, config
+from app.logging_config import setup_logging
+from flask import Flask
+class TestLoggingConfig:
+    """Test logging configuration"""
+
+    def test_setup_logging_creates_logger(self):
+        """Ensure setup_logging returns a configured logger"""
+        app = Flask(__name__)
+        logger = setup_logging(app)
+        assert logger is app.logger
+        assert len(app.logger.handlers) > 0
+        assert logger.level == 20  # logging.INFO
 
 class TestConfig:
     """Test base configuration"""
