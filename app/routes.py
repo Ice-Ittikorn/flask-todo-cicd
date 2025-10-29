@@ -4,6 +4,7 @@ from app.models import db, Todo
 # ✅ ใช้ชื่อ api ให้ตรงกับ import ใน __init__.py
 api = Blueprint('api', __name__)
 
+
 @api.route('/')
 def root():
     return jsonify({"message": "Welcome to Flask TODO API"}), 200
