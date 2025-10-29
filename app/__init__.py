@@ -1,74 +1,46 @@
-import os
 from flask import Flask, jsonify
-from app.models import db
-from app.routes import api
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_cors import CORS
 from app.config import config
+from app.logging_config import setup_logging
 
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+db = SQLAlchemy()
+migrate = Migrate()
 
 
-def create_app(config_name=None):
+def create_app(config_name='default'):
     """Application factory pattern"""
-    if config_name is None:
-        config_name = os.getenv('FLASK_ENV', 'development')
-
     app = Flask(__name__)
     app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
+
+    # Setup CORS
+    CORS(app)
+
+    # Initialize logging
+    logger = setup_logging(app)
+    logger.info(f"Starting Flask App with config: {config_name}")
 
     # Initialize extensions
     db.init_app(app)
+    migrate.init_app(app, db)
 
-    # Register blueprints
-    app.register_blueprint(api, url_prefix='/api')
+    # Register Blueprints
+    from app.routes import main
+    app.register_blueprint(main)
 
-    # Root endpoint
-    @app.route('/')
-    def index():
-        return jsonify({
-            'message': 'Flask Todo API',
-            'version': '1.0.0',
-            'endpoints': {
-                'health': '/api/health',
-                'todos': '/api/todos'
-            }
-        })
-    
-    limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
-
-    # Error handlers
+    # Error Handlers
     @app.errorhandler(404)
     def not_found(error):
-        return jsonify({
-            'success': False,
-            'error': 'Resource not found'
-        }), 404
+        return jsonify({"error": "Resource not found"}), 404
 
     @app.errorhandler(500)
     def internal_error(error):
-        return jsonify({
-            'success': False,
-            'error': 'Internal server error'
-        }), 500
+        return jsonify({"error": "Internal server error"}), 500
 
-    @app.errorhandler(Exception)
-    def handle_exception(error):
-        """Handle all unhandled exceptions"""
-        db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': 'Internal server error'
-        }), 500
-    
-    
-
-    # Create tables
-    with app.app_context():
-        db.create_all()
+    @app.route('/api/health')
+    def health_check():
+        """Simple health check endpoint"""
+        return jsonify({"status": "ok"}), 200
 
     return app
