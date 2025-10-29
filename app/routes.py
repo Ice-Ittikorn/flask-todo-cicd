@@ -9,6 +9,7 @@ api = Blueprint('api', __name__)
 def root():
     return jsonify({"message": "Welcome to Flask TODO API"}), 200
 
+
 @api.route('/health', methods=['GET'])
 def health_check():
     """Simple health check endpoint"""
