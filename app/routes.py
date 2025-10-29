@@ -9,18 +9,23 @@ api = Blueprint('api', __name__)
 def health_check():
     """Health check endpoint"""
     try:
-        # ลอง query database
+        # Ensure DB session is ready
+        db.session.connection()
         db.session.execute("SELECT 1")
+
+        # ✅ ถ้า query สำเร็จ ให้คืน 200
         return jsonify({
             "status": "healthy",
             "database": "connected"
-        }), 200  # ✅ test คาดว่า healthy = 200
-    except Exception:
+        }), 200
+
+    except Exception as e:
+        # ✅ ต้องคืน error, status=unhealthy และ database=disconnected
         return jsonify({
             "status": "unhealthy",
-            "database": "disconnected"  # ✅ ต้องใช้ disconnected แทน unavailable
+            "database": "disconnected",
+            "error": str(e)  # ✅ เพิ่ม key 'error' ตามที่ test ต้องการ
         }), 503
-
 
 @api.route('/todos', methods=['GET'])
 def get_todos():
