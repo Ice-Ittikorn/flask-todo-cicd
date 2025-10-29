@@ -48,6 +48,21 @@ def create_app(config_name=None):
             }
         })
 
+    # ✅ Health check endpoint for CI/CD
+    @app.route('/api/health', methods=['GET'])
+    def health_check():
+        try:
+            # ลองเชื่อมต่อ Database เพื่อตรวจสอบความพร้อมของระบบ
+            db.session.execute("SELECT 1")
+            db_status = True
+        except Exception:
+            db_status = False
+
+        return jsonify({
+            'status': 'ok' if db_status else 'degraded',
+            'database': db_status
+        }), 200 if db_status else 503
+
     # ✅ Custom Error Handlers
     @app.errorhandler(404)
     def not_found(error):
