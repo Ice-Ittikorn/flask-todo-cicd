@@ -9,8 +9,9 @@ api = Blueprint('api', __name__)
 def health_check():
     """Health check endpoint"""
     try:
-        # ✅ ลอง query เพื่อ trigger mock_execute ใน test
-        db.session.execute("SELECT 1")
+        # ✅ ทดสอบการเชื่อมต่อฐานข้อมูลแบบปลอดภัย
+        connection = db.session.connection()
+        connection.execute("SELECT 1")
 
         return jsonify({
             "status": "healthy",
@@ -18,7 +19,7 @@ def health_check():
         }), 200
 
     except Exception as e:
-        # ✅ test ต้องการ status=unhealthy + database=disconnected + error key
+        # ✅ ถ้าเชื่อมต่อไม่ได้ (เช่น ใน test mock ให้ล้มเหลว)
         return jsonify({
             "status": "unhealthy",
             "database": "disconnected",
