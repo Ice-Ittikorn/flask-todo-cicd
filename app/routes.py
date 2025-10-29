@@ -9,15 +9,16 @@ api = Blueprint('api', __name__)
 def health_check():
     """Health check endpoint"""
     try:
+        # ลอง query database
         db.session.execute("SELECT 1")
         return jsonify({
             "status": "healthy",
             "database": "connected"
-        }), 200
+        }), 200  # ✅ test คาดว่า healthy = 200
     except Exception:
         return jsonify({
             "status": "unhealthy",
-            "database": "unavailable"
+            "database": "disconnected"  # ✅ ต้องใช้ disconnected แทน unavailable
         }), 503
 
 
