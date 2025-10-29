@@ -7,22 +7,27 @@ api = Blueprint('api', __name__)
 
 @api.route('/health', methods=['GET'])
 def health_check():
-    """Simple health check endpoint"""
+    """Health check endpoint"""
     try:
         db.session.execute("SELECT 1")
-        return jsonify({"status": "healthy"}), 200  # ✅ test ต้องการ status=healthy
+        return jsonify({
+            "status": "healthy",
+            "database": "connected"
+        }), 200
     except Exception:
-        return jsonify({"status": "unhealthy"}), 503  # ✅ test ต้องการ unhealthy
+        return jsonify({
+            "status": "unhealthy",
+            "database": "unavailable"
+        }), 503
 
 
-# ✅ CRUD Routes for Todos
 @api.route('/todos', methods=['GET'])
 def get_todos():
     todos = Todo.query.all()
     todos_data = [todo.to_dict() for todo in todos]
     return jsonify({
         "success": True,
-        "count": len(todos_data),  # ✅ test ต้องการ count
+        "count": len(todos_data),
         "data": todos_data
     }), 200
 
@@ -53,13 +58,14 @@ def create_todo():
     try:
         todo = Todo(
             title=data['title'],
-            description=data.get('description'),
+            description=data.get('description', ''),  # ✅ ต้องเป็น '' แทน None
             completed=data.get('completed', False)
         )
         db.session.add(todo)
         db.session.commit()
         return jsonify({
             "success": True,
+            "message": "Todo created successfully",  # ✅ เพิ่ม message
             "data": todo.to_dict()
         }), 201
     except SQLAlchemyError as e:
