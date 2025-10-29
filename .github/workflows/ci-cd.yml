@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
@@ -127,6 +127,7 @@ jobs:
     steps:
       - name: Trigger Render Deployment
         run: |
+          echo "🚀 Triggering Render deployment..."
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
       - name: Wait for Render to start
@@ -136,7 +137,7 @@ jobs:
         run: |
           echo "🔍 Checking Render deployment health..."
           for i in {1..10}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.RENDER_APP_URL }}/api/health || true)
+            STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" ${{ secrets.RENDER_APP_URL }}/api/health || true)
             if [ "$STATUS" = "200" ]; then
               echo "✅ Render deployment healthy!"
               exit 0
@@ -165,15 +166,16 @@ jobs:
 
       - name: Deploy to Railway
         env:
-          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           echo "🔗 Linking Railway project..."
-          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} || echo "Already linked"
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production || echo "Already linked"
+
           echo "🚀 Deploying to Railway..."
           if [ -n "${{ secrets.RAILWAY_SERVICE_NAME }}" ]; then
-            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci
+            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci --yes
           else
-            railway up --ci
+            railway up --ci --yes
           fi
 
       - name: Wait for Railway to start
@@ -182,8 +184,9 @@ jobs:
       - name: Health check
         run: |
           echo "🔍 Checking Railway deployment health..."
+          APP_URL=${{ secrets.RAILWAY_APP_URL }}
           for i in {1..10}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.RAILWAY_APP_URL }}/api/health || true)
+            STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" "$APP_URL/api/health" || true)
             if [ "$STATUS" = "200" ]; then
               echo "✅ Railway deployment healthy!"
               exit 0
