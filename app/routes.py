@@ -9,17 +9,15 @@ api = Blueprint('api', __name__)
 def health_check():
     """Health check endpoint"""
     try:
-        # ✅ ลองเชื่อมต่อฐานข้อมูล ถ้าไม่มีปัญหาคืน 200
-        db.session.execute("SELECT 1")
-        db.session.commit()
-
+        # ✅ ตรวจสอบฐานข้อมูลโดยไม่ให้ล้มถ้าตารางยังไม่ถูกสร้าง
+        db.session.execute(db.text("SELECT 1"))
         return jsonify({
             "status": "healthy",
             "database": "connected"
         }), 200
 
     except Exception as e:
-        # ✅ คืน 503 ถ้า database ใช้งานไม่ได้
+        # ✅ fallback: ลอง rollback และตอบ unhealthy
         db.session.rollback()
         return jsonify({
             "status": "unhealthy",
