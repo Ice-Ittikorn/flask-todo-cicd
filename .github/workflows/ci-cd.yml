@@ -166,16 +166,16 @@ jobs:
 
       - name: Deploy to Railway
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
         run: |
           echo "🔗 Linking Railway project..."
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production || echo "Already linked"
 
           echo "🚀 Deploying to Railway..."
           if [ -n "${{ secrets.RAILWAY_SERVICE_NAME }}" ]; then
-            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci --yes
+            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci
           else
-            railway up --ci --yes
+            railway up --ci
           fi
 
       - name: Wait for Railway to start
