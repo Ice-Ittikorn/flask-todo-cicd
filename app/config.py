@@ -1,8 +1,9 @@
-import os
-basedir = os.path.abspath(os.path.dirname(__file__))
 from dotenv import load_dotenv
+import os
 
+basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv()
+
 
 def fix_postgres_url(url):
     """Convert postgres:// to postgresql:// for SQLAlchemy"""
