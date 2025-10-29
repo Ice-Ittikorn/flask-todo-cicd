@@ -164,7 +164,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-            - name: Deploy to Railway
+      - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
@@ -177,7 +177,6 @@ jobs:
           else
             railway up --ci
           fi
-
 
       - name: Wait for Railway to start
         run: sleep 90
