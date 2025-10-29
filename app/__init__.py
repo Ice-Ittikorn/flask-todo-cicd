@@ -15,7 +15,8 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-    # ✅ Enable CORS for GitHub Pages and local dev
+    # Enable CORS for GitHub Pages
+    # แก้ไข code บรรทัด "https://your-username.github.io"  ให้เป็นโดเมนของเว็บตนเอง
     CORS(app, resources={
         r"/api/*": {
             "origins": [
@@ -30,13 +31,9 @@ def create_app(config_name=None):
         }
     })
 
-    # ✅ Initialize database
     db.init_app(app)
-
-    # ✅ Register API Blueprint
     app.register_blueprint(api, url_prefix='/api')
 
-    # ✅ Root endpoint
     @app.route('/')
     def index():
         return jsonify({
@@ -48,24 +45,6 @@ def create_app(config_name=None):
             }
         })
 
-    # ✅ Health check endpoint (used by CI/CD + Railway)
-    @app.route('/api/health', methods=['GET'])
-    def health_check():
-        try:
-            # ลองเชื่อมต่อฐานข้อมูลเพื่อดูว่าทำงานได้ไหม
-            db.session.execute("SELECT 1")
-            return jsonify({
-                'status': 'ok',
-                'database': True
-            }), 200
-        except Exception as e:
-            return jsonify({
-                'status': 'error',
-                'database': False,
-                'error': str(e)
-            }), 503
-
-    # ✅ Error Handlers
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
@@ -83,21 +62,14 @@ def create_app(config_name=None):
 
     @app.errorhandler(Exception)
     def handle_exception(error):
+        """Handle all unhandled exceptions"""
         db.session.rollback()
         return jsonify({
             'success': False,
             'error': 'Internal server error'
         }), 500
 
-    # ✅ Auto create tables if not exist
     with app.app_context():
         db.create_all()
 
     return app
-
-
-# ✅ Entry point for Railway
-if __name__ == "__main__":
-    app = create_app()
-    port = int(os.getenv("PORT", 5000))  # Railway จะส่ง PORT มาใน env
-    app.run(host="0.0.0.0", port=port)
