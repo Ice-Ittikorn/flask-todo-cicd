@@ -1,18 +1,16 @@
 from flask import Blueprint, jsonify, request
 from app.models import db, Todo
 
-# ✅ ประกาศ Blueprint ที่จะใช้ใน __init__.py
-main = Blueprint('main', __name__)
+# ✅ ใช้ชื่อ api ให้ตรงกับ import ใน __init__.py
+api = Blueprint('api', __name__)
 
-
-@main.route('/')
+@api.route('/')
 def root():
     return jsonify({"message": "Welcome to Flask TODO API"}), 200
 
-
-# ✅ Health check endpoint (มีใน test)
-@main.route('/health', methods=['GET'])
+@api.route('/health', methods=['GET'])
 def health_check():
+    """Simple health check endpoint"""
     try:
         db.session.execute("SELECT 1")
         return jsonify({"status": "ok"}), 200
@@ -20,14 +18,14 @@ def health_check():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# ✅ CRUD Routes for Todo
-@main.route('/api/todos', methods=['GET'])
+# ✅ CRUD Routes for Todos
+@api.route('/api/todos', methods=['GET'])
 def get_todos():
     todos = Todo.query.all()
     return jsonify([todo.to_dict() for todo in todos]), 200
 
 
-@main.route('/api/todos/<int:todo_id>', methods=['GET'])
+@api.route('/api/todos/<int:todo_id>', methods=['GET'])
 def get_todo_by_id(todo_id):
     todo = Todo.query.get(todo_id)
     if not todo:
@@ -35,7 +33,7 @@ def get_todo_by_id(todo_id):
     return jsonify(todo.to_dict()), 200
 
 
-@main.route('/api/todos', methods=['POST'])
+@api.route('/api/todos', methods=['POST'])
 def create_todo():
     data = request.get_json()
     if not data or 'title' not in data:
@@ -45,7 +43,7 @@ def create_todo():
         todo = Todo(
             title=data['title'],
             description=data.get('description'),
-            completed=data.get('completed', False),
+            completed=data.get('completed', False)
         )
         db.session.add(todo)
         db.session.commit()
@@ -55,7 +53,7 @@ def create_todo():
         return jsonify({'error': 'Database error', 'message': str(e)}), 500
 
 
-@main.route('/api/todos/<int:todo_id>', methods=['PUT'])
+@api.route('/api/todos/<int:todo_id>', methods=['PUT'])
 def update_todo(todo_id):
     todo = Todo.query.get(todo_id)
     if not todo:
@@ -70,7 +68,7 @@ def update_todo(todo_id):
     return jsonify(todo.to_dict()), 200
 
 
-@main.route('/api/todos/<int:todo_id>', methods=['DELETE'])
+@api.route('/api/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
     todo = Todo.query.get(todo_id)
     if not todo:
