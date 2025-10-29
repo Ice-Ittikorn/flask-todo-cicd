@@ -164,7 +164,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Deploy to Railway
+            - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
@@ -173,10 +173,11 @@ jobs:
 
           echo "🚀 Deploying to Railway..."
           if [ -n "${{ secrets.RAILWAY_SERVICE_NAME }}" ]; then
-            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci --yes
+            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci
           else
-            railway up --ci --yes
+            railway up --ci
           fi
+
 
       - name: Wait for Railway to start
         run: sleep 90
