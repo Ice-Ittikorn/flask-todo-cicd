@@ -13,6 +13,7 @@ def fix_postgres_url(url):
 
 
 class Config:
+    SECRET_KEY = os.getenv("SECRET_KEY", "default-secret-key")
     SQLALCHEMY_DATABASE_URI = fix_postgres_url(
         os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(basedir, 'data.db')}")
     )
