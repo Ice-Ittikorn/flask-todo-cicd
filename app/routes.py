@@ -5,7 +5,6 @@ from app.models import db, Todo
 api = Blueprint('api', __name__)
 
 
-
 @api.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -14,19 +13,18 @@ def health_check():
         db.session.connection()
         db.session.execute("SELECT 1")
 
-        # ✅ ถ้า query สำเร็จ ให้คืน 200
         return jsonify({
             "status": "healthy",
             "database": "connected"
         }), 200
 
     except Exception as e:
-        # ✅ ต้องคืน error, status=unhealthy และ database=disconnected
         return jsonify({
             "status": "unhealthy",
             "database": "disconnected",
-            "error": str(e)  # ✅ เพิ่ม key 'error' ตามที่ test ต้องการ
+            "error": str(e)
         }), 503
+
 
 @api.route('/todos', methods=['GET'])
 def get_todos():
@@ -65,16 +63,17 @@ def create_todo():
     try:
         todo = Todo(
             title=data['title'],
-            description=data.get('description', ''),  # ✅ ต้องเป็น '' แทน None
+            description=data.get('description', ''),  # ✅ ใช้ '' แทน None
             completed=data.get('completed', False)
         )
         db.session.add(todo)
         db.session.commit()
         return jsonify({
             "success": True,
-            "message": "Todo created successfully",  # ✅ เพิ่ม message
+            "message": "Todo created successfully",
             "data": todo.to_dict()
         }), 201
+
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({
