@@ -4,6 +4,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def fix_postgres_url(url: str) -> str:
+    """Convert old postgres:// URLs to postgresql:// for SQLAlchemy."""
+    if url and url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql://", 1)
+    return url
+
+
 class Config:
     """Base configuration class"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -17,10 +24,10 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv(
+    SQLALCHEMY_DATABASE_URI = fix_postgres_url(os.getenv(
         'DATABASE_URL',
-        'postgresql://postgres:postgres@db:5432/todo_dev'
-    )
+        'postgresql://postgres:postgres@localhost:5432/todo_dev'  # local dev DB
+    ))
 
 
 class TestingConfig(Config):
@@ -31,15 +38,15 @@ class TestingConfig(Config):
 
 
 class ProductionConfig(Config):
-    """Production configuration"""
+    """Production configuration for Railway"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = fix_postgres_url(os.getenv('DATABASE_URL'))
 
     @classmethod
     def init_app(cls, app):
         Config.init_app(app)
-        # Production-specific initialization
-        assert os.getenv('DATABASE_URL'), 'DATABASE_URL must be set in production'
+        if not os.getenv('DATABASE_URL'):
+            raise RuntimeError('❌ DATABASE_URL must be set in production')
 
 
 config = {
