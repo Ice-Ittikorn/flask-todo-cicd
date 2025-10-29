@@ -1,12 +1,12 @@
 import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 class Config:
-    """Base configuration class"""
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(basedir, 'data.db')}")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     @staticmethod
