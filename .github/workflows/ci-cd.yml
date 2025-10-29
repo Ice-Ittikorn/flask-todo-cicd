@@ -164,11 +164,14 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: |
-          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway up --ci
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🔗 Linking Railway project..."
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --yes || echo "Already linked"
+
+          echo "🚀 Deploying to Railway..."
+          railway up --service ${{ secrets.RAILWAY_SERVICE_NAME }} --ci
 
       - name: Wait for Railway to start
         run: sleep 90
