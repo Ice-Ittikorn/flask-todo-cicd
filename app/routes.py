@@ -9,16 +9,14 @@ api = Blueprint('api', __name__)
 def health_check():
     """Health check endpoint"""
     try:
-        # Ensure DB session is ready
-        db.session.connection()
+        # ✅ ลองเชื่อมต่อฐานข้อมูล (ถ้า test ใช้ sqlite in-memory จะสำเร็จ)
         db.session.execute("SELECT 1")
-
         return jsonify({
             "status": "healthy",
             "database": "connected"
         }), 200
-
     except Exception as e:
+        # ✅ ถ้า error ให้คืนข้อมูลครบตาม test ต้องการ
         return jsonify({
             "status": "unhealthy",
             "database": "disconnected",
