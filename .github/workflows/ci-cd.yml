@@ -154,11 +154,12 @@ jobs:
         run: npm install -g @railway/cli
       
       - name: Deploy to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
           railway link
-          railway up --service flask-todo-cicd --detach
+          railway up --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
       
       - name: Wait for deployment
         run: sleep 60
