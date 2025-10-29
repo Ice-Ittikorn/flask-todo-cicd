@@ -173,9 +173,9 @@ jobs:
 
           echo "🚀 Deploying to Railway..."
           if [ -n "${{ secrets.RAILWAY_SERVICE_NAME }}" ]; then
-            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci
+            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci --yes
           else
-            railway up --ci
+            railway up --ci --yes
           fi
 
       - name: Wait for Railway to start
