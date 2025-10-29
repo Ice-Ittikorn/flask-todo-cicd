@@ -9,25 +9,21 @@ api = Blueprint('api', __name__)
 def health_check():
     """Health check endpoint"""
     try:
-        # ✅ ตรวจสอบว่า engine ทำงานได้ (ไม่ต้อง execute query จริง)
-        if db.engine:
-            return jsonify({
-                "status": "healthy",
-                "database": "connected"
-            }), 200
+        # ✅ ลอง query เพื่อ trigger mock_execute ใน test
+        db.session.execute("SELECT 1")
+
+        return jsonify({
+            "status": "healthy",
+            "database": "connected"
+        }), 200
 
     except Exception as e:
+        # ✅ test ต้องการ status=unhealthy + database=disconnected + error key
         return jsonify({
             "status": "unhealthy",
             "database": "disconnected",
             "error": str(e)
         }), 503
-
-    # fallback กรณี engine ไม่มี (แต่ไม่ throw error)
-    return jsonify({
-        "status": "unhealthy",
-        "database": "disconnected"
-    }), 503
 
 
 @api.route('/todos', methods=['GET'])
