@@ -171,7 +171,7 @@ jobs:
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} || echo "Already linked"
           echo "🚀 Deploying to Railway..."
           if [ -n "${{ secrets.RAILWAY_SERVICE_NAME }}" ]; then
-            railway up --service ${{ secrets.RAILWAY_SERVICE_NAME }} --ci
+            railway up --service "${{ secrets.RAILWAY_SERVICE_NAME }}" --ci
           else
             railway up --ci
           fi
