@@ -5,6 +5,7 @@ from app.models import db, Todo
 api = Blueprint('api', __name__)
 
 
+
 @api.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
